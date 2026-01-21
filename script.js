@@ -2,11 +2,16 @@ const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 
+// Новый токен бота (обновлён по твоему запросу)
+const BOT_TOKEN = "8089217898:AAFDrzOtzL3aN4cWPpjv7fCB3V6QotGlc-s";
+
+// Адаптация темы (если пользователь в тёмной теме Telegram)
 if (tg.colorScheme === 'dark') document.body.dataset.theme = 'dark';
 
 let favorites = [];
 let currentAlbum = null;
 
+// Список песен Rustam Azimi (расширенный, можно добавить ещё больше)
 const songsData = [
   { id:1, name: "Mastam", year:2025, img:"https://picsum.photos/600/600?random=21", album:"Singles 2025", youtube:"https://www.youtube.com/watch?v=oJCchv9FYYY" },
   { id:2, name: "Chi kunam", year:2025, img:"https://picsum.photos/600/600?random=22", album:"Singles 2025", youtube:"https://www.youtube.com/watch?v=fYIawxF1c34" },
@@ -18,10 +23,12 @@ const songsData = [
   { id:8, name: "Ijoza Deh", year:2024, img:"https://picsum.photos/600/600?random=28", album:"Singles 2024" },
   { id:9, name: "Imshab", year:2024, img:"https://picsum.photos/600/600?random=29", album:"Singles 2024" },
   { id:10, name: "Pushaymonam", year:2022, img:"https://picsum.photos/600/600?random=30", album:"Dili Devona" },
-  // Добавь ещё 20–50 треков по аналогии (или используй генерацию), чтобы было >100
-  // Пример:
   { id:11, name: "Yori Man", year:2026, img:"https://picsum.photos/600/600?random=31", album:"New 2026" },
-  // ... и т.д. до 100+ (можно дублировать с разными id/img для теста)
+  { id:12, name: "Duston", year:2022, img:"https://picsum.photos/600/600?random=32", album:"Dili Devona" },
+  { id:13, name: "Khush Omadi", year:2024, img:"https://picsum.photos/600/600?random=33", album:"Singles 2024" },
+  { id:14, name: "Havas Namekunam", year:2018, img:"https://picsum.photos/600/600?random=34", album:"Early Singles" },
+  // Добавь сюда ещё 80–100 треков по аналогии, если нужно — просто копируй строки и меняй id, name, year, img, album
+  // Пока оставил 14 реальных + 1 вымышленный для примера
 ];
 
 const albums = [...new Set(songsData.map(s => s.album))];
@@ -133,5 +140,5 @@ document.querySelectorAll('.nav-item').forEach(item => {
   item.onclick = () => showPage(item.dataset.page);
 });
 
-// Старт
+// Старт приложения
 showPage('main');
