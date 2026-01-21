@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Rustam Azimi • Official</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;500;700&display=swap" rel="stylesheet">
+</head>
+<body data-theme="dark">
+
+  <header>
+    <div class="logo">Rustam Azimi</div>
+    <div class="header-icons">
+      <span id="favorites-count">0</span> ♡
+    </div>
+  </header>
+
+  <div class="hero" id="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1>Mastam</h1>
+      <p>Новый хит 2025 • Official Video</p>
+      <button class="btn-primary" onclick="window.open('https://www.youtube.com/watch?v=oJCchv9FYYY', '_blank')">Смотреть клип</button>
+    </div>
+  </div>
+
+  <div class="search-container">
+    <input type="text" placeholder="Найти трек или альбом..." id="search-input" oninput="filterSongs()" />
+  </div>
+
+  <div class="section-title" id="section-title">Популярные треки</div>
+  <div class="songs-grid" id="songs"></div>
+
+  <!-- Каталог альбомов -->
+  <div id="catalog-page" class="page" style="display:none;">
+    <div class="section-title">Альбомы & Синлы</div>
+    <div class="albums-grid" id="albums"></div>
+  </div>
+
+  <!-- Избранное -->
+  <div id="favorites-page" class="page" style="display:none;">
+    <div class="section-title">Ваш плейлист</div>
+    <div id="favorites-list"></div>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item active" data-page="main">Главная</div>
+    <div class="nav-item" data-page="catalog">Каталог</div>
+    <div class="nav-item" data-page="favorites">
+      Избранное
+      <span class="badge" id="favorites-badge">0</span>
+    </div>
+    <div class="nav-item" data-page="profile">Профиль</div>
+  </nav>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
