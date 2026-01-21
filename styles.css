@@ -1,7 +1,7 @@
 :root {
   --bg: #0a0a0a;
   --text: #f5f5f5;
-  --accent: #006400;        /* тёмно-зелёный */
+  --accent: #006400;          /* тёмно-зелёный */
   --gold: #d4af37;
   --gray: #1e1e1e;
   --dark: #000000;
@@ -96,6 +96,12 @@ header {
 .btn-primary:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 35px rgba(0,100,0,0.6);
+}
+
+.btn-primary.small {
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  margin-top: 12px;
 }
 
 .search-container {
@@ -214,3 +220,20 @@ header {
 }
 
 .page { padding: 90px 0 100px; }
+
+.favorite-item {
+  display: flex;
+  align-items: center;
+  background: var(--gray);
+  border-radius: 12px;
+  margin: 12px 20px;
+  padding: 12px;
+  gap: 16px;
+}
+
+.favorite-img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+}
