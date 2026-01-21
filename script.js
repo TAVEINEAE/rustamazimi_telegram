@@ -1,274 +1,138 @@
-:root {
-  --bg: #0a0a0a;
-  --text: #f5f5f5;
-  --accent: #006400;        /* тёмно-зелёный */
-  --gold: linear-gradient(45deg, #d4af37, #ffd700); /* золотой градиент */
-  --gray: #1e1e1e;
-  --dark: #000000;
-  --shadow: 0 10px 30px rgba(0,100,0,0.4); /* зелёное свечение */
+const tg = window.Telegram.WebApp;
+tg.ready();
+tg.expand();
+
+// Токен бота
+const BOT_TOKEN = "8089217898:AAFDrzOtzL3aN4cWPpjv7fCB3V6QotGlc-s";
+
+// Тёмная тема
+if (tg.colorScheme === 'dark') document.body.dataset.theme = 'dark';
+
+let favorites = [];
+let currentAlbum = null;
+
+// Свежие треки 2025–2026 + классика (расширенный список)
+const songsData = [
+  { id:1, name: "Mastam", year:2025, img:"https://picsum.photos/600/600?random=1", album:"Singles 2025", youtube:"https://www.youtube.com/watch?v=oJCchv9FYYY", audio:"https://example.com/mastam.mp3" }, // Замени на реальный mp3
+  { id:2, name: "Chi Kunam", year:2025, img:"https://picsum.photos/600/600?random=2", album:"Singles 2025", youtube:"https://www.youtube.com/watch?v=fYIawxF1c34", audio:"https://example.com/chi_kunam.mp3" },
+  { id:3, name: "Odate", year:2025, img:"https://picsum.photos/600/600?random=3", album:"Singles 2025", youtube:"https://www.youtube.com/watch?v=_ic4Ns3xLkI", audio:"https://example.com/odate.mp3" },
+  { id:4, name: "Ey Dust", year:2025, img:"https://picsum.photos/600/600?random=4", album:"Singles 2025", youtube:"https://www.youtube.com/watch?v=GAyAxfLScD4", audio:"https://example.com/ey_dust.mp3" },
+  { id:5, name: "Surayo (feat. Rustam Azimi)", year:2025, img:"https://picsum.photos/600/600?random=5", album:"Singles 2025", audio:"https://example.com/surayo.mp3" },
+  { id:6, name: "Yod Kardam", year:2024, img:"https://picsum.photos/600/600?random=6", album:"Singles 2024", audio:"https://example.com/yod_kardam.mp3" },
+  { id:7, name: "Ajab Shirini", year:2025, img:"https://picsum.photos/600/600?random=7", album:"Singles 2025", audio:"https://example.com/ajab_shirini.mp3" },
+  { id:8, name: "Shahlo", year:2023, img:"https://picsum.photos/600/600?random=8", album:"Singles 2023", youtube:"https://www.youtube.com/watch?v=utSpSwc0kqA", audio:"https://example.com/shahlo.mp3" },
+  { id:9, name: "Leyla", year:2019, img:"https://picsum.photos/600/600?random=9", album:"Dili Devona", audio:"https://example.com/leyla.mp3" },
+  { id:10, name: "Bevafo", year:2023, img:"https://picsum.photos/600/600?random=10", album:"Singles 2023", audio:"https://example.com/bevafo.mp3" },
+  // Добавь ещё 90+ по аналогии
+];
+
+const albums = [...new Set(songsData.map(s => s.album))];
+
+function renderSongs(list) {
+  const el = document.getElementById('songs');
+  el.innerHTML = '';
+  list.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <img class="card-img" src="${s.img}" alt="${s.name}">
+      <div class="card-body">
+        <div class="card-title">${s.name} <small>(${s.year})</small></div>
+        <audio controls src="${s.audio || s.youtube}" style="width:100%;margin-top:8px;"></audio>
+        <button class="add-to-favorites">♡ В плейлист</button>
+        <button class="btn-primary small" onclick="tg.openLink('${s.youtube || '#'}')">YouTube</button>
+      </div>
+    `;
+    card.querySelector('.add-to-favorites').onclick = () => addToFavorites(s.id);
+    el.appendChild(card);
+  });
 }
 
-body {
-  margin: 0;
-  font-family: 'Montserrat', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
+function renderAlbums() {
+  const el = document.getElementById('albums');
+  el.innerHTML = '';
+  albums.forEach(alb => {
+    const card = document.createElement('div');
+    card.className = 'card category-card';
+    card.innerHTML = `<div class="card-title">${alb}</div>`;
+    card.onclick = () => showAlbum(alb);
+    el.appendChild(card);
+  });
 }
 
-header {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: 60px;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  z-index: 1000;
-  border-bottom: 1px solid rgba(212,175,55,0.15);
+function updateFavorites() {
+  document.getElementById('favorites-count').textContent = favorites.length;
+  document.getElementById('favorites-badge').textContent = favorites.length;
+
+  const list = document.getElementById('favorites-list');
+  list.innerHTML = '';
+  favorites.forEach((s, i) => {
+    const item = document.createElement('div');
+    item.className = 'favorite-item';
+    item.innerHTML = `
+      <img src="${s.img}" class="favorite-img">
+      <div>${s.name} (${s.year}) — ${s.album}</div>
+      <audio controls src="${s.audio || s.youtube}" style="width:100%;margin-top:8px;"></audio>
+      <button onclick="removeFavorite(${i})">×</button>
+    `;
+    list.appendChild(item);
+  });
 }
 
-.logo {
-  font-family: 'Playfair Display', serif;
-  font-size: 24px;
-  font-weight: 700;
-  background: var(--gold);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  letter-spacing: 1px;
+function addToFavorites(id) {
+  const song = songsData.find(s => s.id === id);
+  if (song && !favorites.some(f => f.id === id)) {
+    favorites.push(song);
+    updateFavorites();
+    tg.showPopup({title:"Добавлено", message:`${song.name} в вашем плейлисте`});
+  }
 }
 
-.header-icons {
-  font-size: 20px;
-  color: var(--gold);
+function removeFavorite(index) {
+  favorites.splice(index, 1);
+  updateFavorites();
 }
 
-.hero {
-  height: 60vh;
-  min-height: 400px;
-  background: url('https://picsum.photos/1200/800?random=1') center/cover no-repeat;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  animation: fadeIn 1.5s ease-in;
+function showPage(page) {
+  document.querySelectorAll('.page, #songs, #hero, .search-container').forEach(e => e.style.display = 'none');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelector(`[data-page="${page}"]`).classList.add('active');
+
+  if (page === 'main') {
+    document.getElementById('hero').style.display = 'flex';
+    document.querySelector('.search-container').style.display = 'block';
+    document.getElementById('songs').style.display = 'grid';
+    document.getElementById('section-title').textContent = 'Свежие и популярные треки';
+    renderSongs(songsData.slice(0, 12));
+  } else if (page === 'catalog') {
+    document.getElementById('catalog-page').style.display = 'block';
+    renderAlbums();
+  } else if (page === 'favorites') {
+    document.getElementById('favorites-page').style.display = 'block';
+    updateFavorites();
+  } else if (page === 'profile') {
+    document.getElementById('profile-page').style.display = 'block';
+  }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; } to { opacity: 1; }
+function showAlbum(album) {
+  document.getElementById('catalog-page').style.display = 'none';
+  document.getElementById('songs').style.display = 'grid';
+  document.getElementById('section-title').textContent = album;
+  const filtered = songsData.filter(s => s.album === album);
+  renderSongs(filtered);
 }
 
-.hero-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(10,10,10,0.9));
+function filterSongs() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const filtered = songsData.filter(s => s.name.toLowerCase().includes(q));
+  renderSongs(filtered);
 }
 
-.hero-content {
-  position: relative;
-  z-index: 2;
-}
+// Навигация
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.onclick = () => showPage(item.dataset.page);
+});
 
-.hero h1 {
-  font-family: 'Playfair Display', serif;
-  font-size: 4.5rem;
-  margin: 0;
-  background: var(--gold);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 4px 20px rgba(0,0,0,0.8);
-}
-
-.hero p {
-  font-size: 1.4rem;
-  margin: 12px 0 24px;
-  opacity: 0.9;
-}
-
-.btn-primary {
-  background: var(--accent);
-  color: white;
-  border: none;
-  padding: 14px 32px;
-  border-radius: 50px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
-  box-shadow: var(--shadow);
-}
-
-.btn-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 35px rgba(0,100,0,0.6);
-}
-
-.btn-primary.small {
-  padding: 10px 20px;
-  font-size: 0.95rem;
-  margin-top: 12px;
-}
-
-.search-container {
-  padding: 80px 20px 20px;
-}
-
-.search-container input {
-  width: 100%;
-  padding: 14px 20px 14px 50px;
-  background: var(--gray);
-  border: 1px solid var(--accent);
-  border-radius: 50px;
-  color: var(--text);
-  font-size: 1rem;
-}
-
-.search-container input::placeholder { color: #aaa; }
-
-.section-title {
-  padding: 0 20px;
-  margin: 30px 0 16px;
-  font-family: 'Playfair Display', serif;
-  font-size: 2rem;
-  background: var(--gold);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.songs-grid, .albums-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 20px;
-  padding: 0 20px;
-}
-
-.card {
-  background: var(--gray);
-  border-radius: 16px;
-  overflow: hidden;
-  transition: all 0.4s ease;
-  box-shadow: var(--shadow);
-  cursor: pointer;
-}
-
-.card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 20px 50px rgba(0,100,0,0.5);
-}
-
-.card-img {
-  width: 100%;
-  aspect-ratio: 1/1;
-  object-fit: cover;
-}
-
-.card-body {
-  padding: 16px;
-  text-align: center;
-}
-
-.card-title {
-  font-size: 1.1rem;
-  margin-bottom: 8px;
-  color: var(--gold);
-}
-
-.add-to-favorites {
-  background: transparent;
-  border: 1px solid var(--gold);
-  color: var(--gold);
-  width: 100%;
-  padding: 10px;
-  border-radius: 30px;
-  margin-top: 12px;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.add-to-favorites:hover {
-  background: var(--gold);
-  color: var(--dark);
-}
-
-.bottom-nav {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  height: 70px;
-  background: rgba(0,0,0,0.8);
-  backdrop-filter: blur(12px);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  border-top: 1px solid rgba(212,175,55,0.2);
-  z-index: 1000;
-}
-
-.nav-item {
-  color: #aaa;
-  font-size: 0.9rem;
-  text-align: center;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.nav-item.active, .nav-item:hover {
-  color: var(--gold);
-}
-
-.badge {
-  background: var(--accent);
-  color: white;
-  font-size: 0.7rem;
-  padding: 2px 6px;
-  border-radius: 12px;
-  position: absolute;
-  top: -8px;
-  right: -10px;
-}
-
-.page { padding: 90px 0 100px; }
-
-.favorite-item {
-  display: flex;
-  align-items: center;
-  background: var(--gray);
-  border-radius: 12px;
-  margin: 12px 20px;
-  padding: 12px;
-  gap: 16px;
-}
-
-.favorite-img {
-  width: 70px;
-  height: 70px;
-  object-fit: cover;
-  border-radius: 8px;
-}
-
-.profile-content {
-  padding: 0 20px;
-  font-size: 1rem;
-  line-height: 1.6;
-  color: #ddd;
-}
-
-.social-links {
-  margin-top: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.social-links a {
-  color: var(--gold);
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.social-links a:hover {
-  text-decoration: underline;
-}
+// Старт
+showPage('main');
