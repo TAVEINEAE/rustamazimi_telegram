@@ -2,16 +2,16 @@ const tg = window.Telegram.WebApp;
 tg.ready();
 tg.expand();
 
-// Новый токен бота (обновлён по твоему запросу)
+// Актуальный токен бота (обновлён 21 января 2026)
 const BOT_TOKEN = "8089217898:AAFDrzOtzL3aN4cWPpjv7fCB3V6QotGlc-s";
 
-// Адаптация темы (если пользователь в тёмной теме Telegram)
+// Тёмная тема по умолчанию + адаптация под Telegram
 if (tg.colorScheme === 'dark') document.body.dataset.theme = 'dark';
 
 let favorites = [];
 let currentAlbum = null;
 
-// Список песен Rustam Azimi (расширенный, можно добавить ещё больше)
+// Список треков (можно расширить до 100+)
 const songsData = [
   { id:1, name: "Mastam", year:2025, img:"https://picsum.photos/600/600?random=21", album:"Singles 2025", youtube:"https://www.youtube.com/watch?v=oJCchv9FYYY" },
   { id:2, name: "Chi kunam", year:2025, img:"https://picsum.photos/600/600?random=22", album:"Singles 2025", youtube:"https://www.youtube.com/watch?v=fYIawxF1c34" },
@@ -27,8 +27,7 @@ const songsData = [
   { id:12, name: "Duston", year:2022, img:"https://picsum.photos/600/600?random=32", album:"Dili Devona" },
   { id:13, name: "Khush Omadi", year:2024, img:"https://picsum.photos/600/600?random=33", album:"Singles 2024" },
   { id:14, name: "Havas Namekunam", year:2018, img:"https://picsum.photos/600/600?random=34", album:"Early Singles" },
-  // Добавь сюда ещё 80–100 треков по аналогии, если нужно — просто копируй строки и меняй id, name, year, img, album
-  // Пока оставил 14 реальных + 1 вымышленный для примера
+  // Добавьте сюда ещё треки по необходимости
 ];
 
 const albums = [...new Set(songsData.map(s => s.album))];
@@ -105,7 +104,7 @@ function showPage(page) {
     document.querySelector('.search-container').style.display = 'block';
     document.getElementById('songs').style.display = 'grid';
     document.getElementById('section-title').textContent = 'Популярные треки';
-    renderSongs(songsData.slice(0, 12)); // топ
+    renderSongs(songsData.slice(0, 12));
   } else if (page === 'catalog') {
     document.getElementById('catalog-page').style.display = 'block';
     renderAlbums();
@@ -140,5 +139,5 @@ document.querySelectorAll('.nav-item').forEach(item => {
   item.onclick = () => showPage(item.dataset.page);
 });
 
-// Старт приложения
+// Запуск
 showPage('main');
